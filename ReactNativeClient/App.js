@@ -29,15 +29,31 @@ import {
 
 
 
-export default class App extends React.Component
-{
-  render()
-  {
-    return(
-    <>
-      <Text>Issue Tracker</Text>
-      <IssueList/>
-    </>);
-
+export default class App extends React.Component {
+  render() {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView>
+          <Text style={styles.header}>Issue Tracker</Text>
+          <IssueList />
+        </ScrollView>
+      </SafeAreaView>
+    );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    padding: 16,
+    backgroundColor: '#537791',
+    color: 'white',
+  },
+});
+
