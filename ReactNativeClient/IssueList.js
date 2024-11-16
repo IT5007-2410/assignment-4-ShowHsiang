@@ -67,11 +67,14 @@ class IssueFilter extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff' },
+  container: { flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff' },
   header: { height: 50, backgroundColor: '#537791' },
   text: { textAlign: 'center' },
   dataWrapper: { marginTop: -1 },
-  row: { height: 40, backgroundColor: '#E7E6E1' }
+  row: { height: 40, backgroundColor: '#E7E6E1' },
+  form: { padding: 16 },
+  input: { borderWidth: 1, padding: 8, marginBottom: 16, borderColor: '#ccc' },
+  filterContainer: { padding: 16 },
   });
 
 const width= [40,80,80,80,80,80,200];
@@ -174,20 +177,35 @@ class BlackList extends React.Component {
     {   super();
         this.handleSubmit = this.handleSubmit.bind(this);
         /****** Q4: Start Coding here. Create State to hold inputs******/
+        this.state = { owner: '' };
         /****** Q4: Code Ends here. ******/
     }
     /****** Q4: Start Coding here. Add functions to hold/set state input based on changes in TextInput******/
+    handleChange(value) {
+      this.setState({ owner: value });
+    }
     /****** Q4: Code Ends here. ******/
 
     async handleSubmit() {
     /****** Q4: Start Coding here. Create an issue from state variables and issue a query. Also, clear input field in front-end******/
+      const { owner } = this.state;
+      this.props.addToBlacklist(owner);
+      this.setState({ owner: '' });
     /****** Q4: Code Ends here. ******/
     }
 
     render() {
     return (
-        <View>
+        <View style={styles.form}>
         {/****** Q4: Start Coding here. Create TextInput field, populate state variables. Create a submit button, and on submit, trigger handleSubmit.*******/}
+          <Text>Add Owner to Blacklist:</Text>
+          <TextInput
+            style={styles.input}
+            value={this.state.owner}
+            placeholder="Owner to Blacklist"
+            onChangeText={(text) => this.handleChange(text)}
+          />
+          <Button title="Add to Blacklist" onPress={this.handleSubmit} />
         {/****** Q4: Code Ends here. ******/}
         </View>
     );
@@ -199,6 +217,7 @@ export default class IssueList extends React.Component {
         super();
         this.state = { issues: [] };
         this.createIssue = this.createIssue.bind(this);
+        this.addToBlacklist = this.addToBlacklist.bind(this);
     }
     
     componentDidMount() {
