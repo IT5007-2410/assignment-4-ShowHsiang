@@ -52,7 +52,14 @@ class IssueFilter extends React.Component {
       return (
         <>
         {/****** Q1: Start Coding here. ******/}
-
+        <View style={styles.filterContainer}>
+        <Text>Filter Issues:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter filter criteria"
+          onChangeText={this.props.onFilterChange}
+        />
+      </View>
         {/****** Q1: Code ends here ******/}
         </>
       );
@@ -72,11 +79,12 @@ const width= [40,80,80,80,80,80,200];
 function IssueRow(props) {
     const issue = props.issue;
     {/****** Q2: Coding Starts here. Create a row of data in a variable******/}
+    const rowData = [issue.id, issue.title, issue.status, issue.owner, issue.created.toLocaleDateString()];
     {/****** Q2: Coding Ends here.******/}
     return (
       <>
       {/****** Q2: Start Coding here. Add Logic to render a row  ******/}
-      
+      <Row data={rowData} style={styles.row} textStyle={styles.text} />;
       {/****** Q2: Coding Ends here. ******/}  
       </>
     );
@@ -89,16 +97,21 @@ function IssueRow(props) {
     );
 
     {/****** Q2: Start Coding here. Add Logic to initalize table header  ******/}
-
+    const tableHeaders = ['ID', 'Title', 'Status', 'Owner', 'Created'];
     {/****** Q2: Coding Ends here. ******/}
     
     
     return (
-    <View style={styles.container}>
+      <>
     {/****** Q2: Start Coding here to render the table header/rows.**********/}
-    
+      <View style={styles.container}>
+        <Table>
+          <Row data={tableHeaders} style={styles.header} textStyle={styles.text} />
+          <ScrollView style={styles.dataWrapper}>{issueRows}</ScrollView>
+        </Table>
+      </View>
     {/****** Q2: Coding Ends here. ******/}
-    </View>
+      </>
     );
   }
 
@@ -197,17 +210,25 @@ export default class IssueList extends React.Component {
     return (
     <>
     {/****** Q1: Start Coding here. ******/}
+      <SafeAreaView>
+        <ScrollView>
+          <IssueFilter />
     {/****** Q1: Code ends here ******/}
 
 
     {/****** Q2: Start Coding here. ******/}
+          <IssueTable issues={this.state.issues} />
     {/****** Q2: Code ends here ******/}
 
     
     {/****** Q3: Start Coding here. ******/}
+          <IssueAdd createIssue={this.createIssue} />
     {/****** Q3: Code Ends here. ******/}
 
     {/****** Q4: Start Coding here. ******/}
+          <BlackList addToBlacklist={this.addToBlacklist} />
+        </ScrollView>
+      </SafeAreaView>
     {/****** Q4: Code Ends here. ******/}
     </>
       
