@@ -121,21 +121,48 @@ function IssueRow(props) {
       super();
       this.handleSubmit = this.handleSubmit.bind(this);
       /****** Q3: Start Coding here. Create State to hold inputs******/
+      this.state = { title: '', owner: '', effort: '' };
       /****** Q3: Code Ends here. ******/
     }
   
     /****** Q3: Start Coding here. Add functions to hold/set state input based on changes in TextInput******/
+    handleChange(field, value) {
+      this.setState({ [field]: value });
+    }
     /****** Q3: Code Ends here. ******/
     
     handleSubmit() {
       /****** Q3: Start Coding here. Create an issue from state variables and call createIssue. Also, clear input field in front-end******/
+      const { title, owner, effort } = this.state;
+      const issue = { title, owner, effort: parseInt(effort, 10) };
+      this.props.createIssue(issue);
+      this.setState({ title: '', owner: '', effort: '' });
       /****** Q3: Code Ends here. ******/
     }
   
     render() {
       return (
-          <View>
+          <View style={styles.form}>
           {/****** Q3: Start Coding here. Create TextInput field, populate state variables. Create a submit button, and on submit, trigger handleSubmit.*******/}
+            <TextInput
+              style={styles.input}
+              value={this.state.title}
+              placeholder="Title"
+              onChangeText={(text) => this.handleChange('title', text)}
+            />
+            <TextInput
+              style={styles.input}
+              value={this.state.owner}
+              placeholder="Owner"
+              onChangeText={(text) => this.handleChange('owner', text)}
+            />
+            <TextInput
+              style={styles.input}
+              value={this.state.effort}
+              placeholder="Effort"
+              onChangeText={(text) => this.handleChange('effort', text)}
+            />
+            <Button title="Add Issue" onPress={this.handleSubmit} />
           {/****** Q3: Code Ends here. ******/}
           </View>
       );
