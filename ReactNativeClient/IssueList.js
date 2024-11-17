@@ -23,7 +23,7 @@ import {
   async function graphQLFetch(query, variables = {}) {
     try {
         /****** Q4: Start Coding here. State the correct IP/port******/
-        const response = await fetch('http://192.168.10.122:3000/graphql', {
+        const response = await fetch('http://10.0.2.2:3000/graphql', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({ query, variables })
@@ -48,16 +48,32 @@ import {
   }
 
 class IssueFilter extends React.Component {
+    constructor() {
+      super();
+      this.state = { status: '', owner: '' };
+      this.handleFilterChange = this.handleFilterChange.bind(this);
+    }
+
+    handleFilterChange(field, value) {
+      this.setState({ [field]: value }, () => {
+        this.props.onFilter(this.state);
+      });
+    }
     render() {
       return (
         <>
         {/****** Q1: Start Coding here. ******/}
         <View style={styles.filterContainer}>
-        <Text>Filter Issues:</Text>
+        <Text>Filter Issues</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter filter criteria"
-          onChangeText={this.props.onFilterChange}
+          placeholder="Status (New, Assigned, Fixed, Closed)"
+          onChangeText={(text) => this.handleFilterChange('status', text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Owner"
+          onChangeText={(text) => this.handleFilterChange('owner', text)}
         />
       </View>
         {/****** Q1: Code ends here ******/}
@@ -67,27 +83,40 @@ class IssueFilter extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff' },
+  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
   header: { height: 50, backgroundColor: '#537791' },
-  text: { textAlign: 'center' },
+  headerText: { textAlign: 'center', color: '#fff', fontWeight: 'bold' },
   dataWrapper: { marginTop: -1 },
   row: { height: 40, backgroundColor: '#E7E6E1' },
+  text: { textAlign: 'center', color: '#000' },
   form: { padding: 16 },
   input: { borderWidth: 1, padding: 8, marginBottom: 16, borderColor: '#ccc' },
   filterContainer: { padding: 16 },
-  });
+});
 
 const width= [40,80,80,80,80,80,200];
 
 function IssueRow(props) {
     const issue = props.issue;
     {/****** Q2: Coding Starts here. Create a row of data in a variable******/}
-    const rowData = [issue.id, issue.title, issue.status, issue.owner, issue.created.toLocaleDateString()];
+    const rowData = [
+      issue.id,
+      issue.title,
+      issue.status,
+      issue.owner,
+      issue.effort,
+      issue.created.toLocaleDateString(),
+      issue.due ? issue.due.toLocaleDateString() : 'N/A',
+    ];
     {/****** Q2: Coding Ends here.******/}
     return (
       <>
       {/****** Q2: Start Coding here. Add Logic to render a row  ******/}
-      <Row data={rowData} style={styles.row} textStyle={styles.text} />;
+      <Row
+      data={rowData}
+      style={styles.row}
+      textStyle={styles.text}
+    />
       {/****** Q2: Coding Ends here. ******/}  
       </>
     );
@@ -100,19 +129,23 @@ function IssueRow(props) {
     );
 
     {/****** Q2: Start Coding here. Add Logic to initalize table header  ******/}
-    const tableHeaders = ['ID', 'Title', 'Status', 'Owner', 'Created'];
+    const tableHeader = ['ID', 'Title', 'Status', 'Owner', 'Effort', 'Created', 'Due'];
     {/****** Q2: Coding Ends here. ******/}
     
     
     return (
       <>
     {/****** Q2: Start Coding here to render the table header/rows.**********/}
-      <View style={styles.container}>
-        <Table>
-          <Row data={tableHeaders} style={styles.header} textStyle={styles.text} />
-          <ScrollView style={styles.dataWrapper}>{issueRows}</ScrollView>
-        </Table>
-      </View>
+    <View style={styles.container}>
+      <Table>
+        <Row
+          data={tableHeader}
+          style={styles.header}
+          textStyle={styles.text}
+        />
+        <ScrollView style={styles.dataWrapper}>{issueRows}</ScrollView>
+      </Table>
+    </View>
     {/****** Q2: Coding Ends here. ******/}
       </>
     );
@@ -124,7 +157,7 @@ function IssueRow(props) {
       super();
       this.handleSubmit = this.handleSubmit.bind(this);
       /****** Q3: Start Coding here. Create State to hold inputs******/
-      this.state = { title: '', owner: '', effort: '' };
+      this.state = { title: '', owner: '', effort: '', due: '' };
       /****** Q3: Code Ends here. ******/
     }
   
@@ -136,10 +169,19 @@ function IssueRow(props) {
     
     handleSubmit() {
       /****** Q3: Start Coding here. Create an issue from state variables and call createIssue. Also, clear input field in front-end******/
-      const { title, owner, effort } = this.state;
-      const issue = { title, owner, effort: parseInt(effort, 10) };
+      const { title, owner, effort, due} = this.state;
+      if (!title) {
+        Alert.alert('Title is required');
+        return;
+      }
+      const issue = {
+        title,
+        owner: owner || null,
+        effort: effort ? parseInt(effort, 10) : undefined,
+        due: due || undefined,
+      };
       this.props.createIssue(issue);
-      this.setState({ title: '', owner: '', effort: '' });
+      this.setState({ title: '', owner: '', effort: '', due: '' });
       /****** Q3: Code Ends here. ******/
     }
   
@@ -149,21 +191,28 @@ function IssueRow(props) {
           {/****** Q3: Start Coding here. Create TextInput field, populate state variables. Create a submit button, and on submit, trigger handleSubmit.*******/}
             <TextInput
               style={styles.input}
-              value={this.state.title}
               placeholder="Title"
-              onChangeText={(text) => this.handleChange('title', text)}
+              value={this.state.title}
+              onChangeText={(text) => this.handleChange('title', text )}
             />
             <TextInput
               style={styles.input}
-              value={this.state.owner}
               placeholder="Owner"
+              value={this.state.owner}
               onChangeText={(text) => this.handleChange('owner', text)}
             />
             <TextInput
               style={styles.input}
-              value={this.state.effort}
               placeholder="Effort"
+              value={this.state.effort}
+              keyboardType="numeric"
               onChangeText={(text) => this.handleChange('effort', text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Due Date (YYYY-MM-DD)"
+              value={this.state.due}
+              onChangeText={(text) => this.handleChange('due', text)}
             />
             <Button title="Add Issue" onPress={this.handleSubmit} />
           {/****** Q3: Code Ends here. ******/}
@@ -198,11 +247,10 @@ class BlackList extends React.Component {
     return (
         <View style={styles.form}>
         {/****** Q4: Start Coding here. Create TextInput field, populate state variables. Create a submit button, and on submit, trigger handleSubmit.*******/}
-          <Text>Add Owner to Blacklist:</Text>
           <TextInput
             style={styles.input}
+            placeholder="Name to Blacklist"
             value={this.state.owner}
-            placeholder="Owner to Blacklist"
             onChangeText={(text) => this.handleChange(text)}
           />
           <Button title="Add to Blacklist" onPress={this.handleSubmit} />
@@ -215,9 +263,10 @@ class BlackList extends React.Component {
 export default class IssueList extends React.Component {
     constructor() {
         super();
-        this.state = { issues: [] };
+        this.state = { issues: [], filteredIssues: [] };
         this.createIssue = this.createIssue.bind(this);
         this.addToBlacklist = this.addToBlacklist.bind(this);
+        this.applyFilter = this.applyFilter.bind(this);
     }
     
     componentDidMount() {
@@ -234,7 +283,7 @@ export default class IssueList extends React.Component {
 
     const data = await graphQLFetch(query);
     if (data) {
-        this.setState({ issues: data.issueList });
+        this.setState({ issues: data.issueList, filteredIssues: data.issueList });
     }
     }
 
@@ -260,6 +309,17 @@ export default class IssueList extends React.Component {
         alert(`Owner "${owner}" added to blacklist.`);
       }
     }
+
+    applyFilter(filter) {
+      const { status, owner } = filter;
+      const filteredIssues = this.state.issues.filter((issue) => {
+        return (
+          (status === '' || issue.status.toLowerCase() === status.toLowerCase()) &&
+          (owner === '' || issue.owner.toLowerCase().includes(owner.toLowerCase()))
+        );
+      });
+      this.setState({ filteredIssues });
+    }
     
     render() {
       return (
@@ -267,11 +327,11 @@ export default class IssueList extends React.Component {
     {/****** Q1: Start Coding here. ******/}
       <SafeAreaView>
         <ScrollView>
-          <IssueFilter />
+          <IssueFilter onFilter={this.applyFilter} />
     {/****** Q1: Code ends here ******/}
 
     {/****** Q2: Start Coding here. ******/}
-          <IssueTable issues={this.state.issues} />
+          <IssueTable issues={this.state.filteredIssues} />
     {/****** Q2: Code ends here ******/}
 
     
@@ -280,7 +340,7 @@ export default class IssueList extends React.Component {
     {/****** Q3: Code Ends here. ******/}
 
     {/****** Q4: Start Coding here. ******/}
-          <BlackList addToBlacklist={this.addToBlacklist} />
+          <BlackList addToBlacklist={this.addToBlacklist}/>
         </ScrollView>
       </SafeAreaView>
     {/****** Q4: Code Ends here. ******/}
