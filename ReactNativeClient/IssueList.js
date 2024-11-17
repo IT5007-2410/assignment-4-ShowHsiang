@@ -251,16 +251,24 @@ export default class IssueList extends React.Component {
     }
     }
     
+    async addToBlacklist(owner) {
+      const query = `mutation addBlacklist($owner: String!) {
+        addBlacklist(owner: $owner)
+      }`;
+      const data = await graphQLFetch(query, { owner });
+      if (data) {
+        alert(`Owner "${owner}" added to blacklist.`);
+      }
+    }
     
     render() {
-    return (
-    <>
+      return (
+      <>
     {/****** Q1: Start Coding here. ******/}
       <SafeAreaView>
         <ScrollView>
           <IssueFilter />
     {/****** Q1: Code ends here ******/}
-
 
     {/****** Q2: Start Coding here. ******/}
           <IssueTable issues={this.state.issues} />
@@ -276,7 +284,7 @@ export default class IssueList extends React.Component {
         </ScrollView>
       </SafeAreaView>
     {/****** Q4: Code Ends here. ******/}
-    </>
+      </>
       
     );
   }
