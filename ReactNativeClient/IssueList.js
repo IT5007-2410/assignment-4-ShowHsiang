@@ -51,13 +51,16 @@ class IssueFilter extends React.Component {
     constructor() {
       super();
       this.state = { status: '', owner: '' };
+      this.handleSubmit = this.handleSubmit.bind(this); 
       this.handleFilterChange = this.handleFilterChange.bind(this);
     }
 
     handleFilterChange(field, value) {
       this.setState({ [field]: value }, () => {
-        this.props.onFilter(this.state);
       });
+    }
+    handleSubmit() {
+      this.props.onFilter(this.state);
     }
     render() {
       return (
@@ -75,6 +78,7 @@ class IssueFilter extends React.Component {
           placeholder="Owner"
           onChangeText={(text) => this.handleFilterChange('owner', text)}
         />
+        <Button title="Submit Filter" onPress={this.handleSubmit} />
       </View>
         {/****** Q1: Code ends here ******/}
         </>
@@ -157,7 +161,8 @@ function IssueRow(props) {
       super();
       this.handleSubmit = this.handleSubmit.bind(this);
       /****** Q3: Start Coding here. Create State to hold inputs******/
-      this.state = { title: '', owner: '', effort: '', due: '' };
+      this.state = { title: '', owner: '', effort: '', due: '', status: 'New' };
+      this.handleChange = this.handleChange.bind(this);
       /****** Q3: Code Ends here. ******/
     }
   
@@ -169,7 +174,7 @@ function IssueRow(props) {
     
     handleSubmit() {
       /****** Q3: Start Coding here. Create an issue from state variables and call createIssue. Also, clear input field in front-end******/
-      const { title, owner, effort, due} = this.state;
+      const { title, owner, effort, due, status } = this.state;
       if (!title) {
         Alert.alert('Title is required');
         return;
@@ -178,10 +183,11 @@ function IssueRow(props) {
         title,
         owner: owner || null,
         effort: effort ? parseInt(effort, 10) : undefined,
-        due: due || undefined,
+        due: due ? new Date(due).toISOString() : undefined,
+        status,
       };
       this.props.createIssue(issue);
-      this.setState({ title: '', owner: '', effort: '', due: '' });
+      this.setState({ title: '', owner: '', effort: '', due: '', status: 'New' });
       /****** Q3: Code Ends here. ******/
     }
   
@@ -214,6 +220,12 @@ function IssueRow(props) {
               value={this.state.due}
               onChangeText={(text) => this.handleChange('due', text)}
             />
+            <TextInput
+              style={styles.input}
+              placeholder="Status (New, Assigned, Fixed, Closed)"
+              value={this.state.status}
+              onChangeText={(text) => this.handleChange('status', text)} 
+            />
             <Button title="Add Issue" onPress={this.handleSubmit} />
           {/****** Q3: Code Ends here. ******/}
           </View>
@@ -226,20 +238,21 @@ class BlackList extends React.Component {
     {   super();
         this.handleSubmit = this.handleSubmit.bind(this);
         /****** Q4: Start Coding here. Create State to hold inputs******/
-        this.state = { owner: '' };
+        this.state = { name: '' };
+        this.handleChange = this.handleChange.bind(this);
         /****** Q4: Code Ends here. ******/
     }
     /****** Q4: Start Coding here. Add functions to hold/set state input based on changes in TextInput******/
     handleChange(value) {
-      this.setState({ owner: value });
+      this.setState({ name: value });
     }
     /****** Q4: Code Ends here. ******/
 
     async handleSubmit() {
     /****** Q4: Start Coding here. Create an issue from state variables and issue a query. Also, clear input field in front-end******/
-      const { owner } = this.state;
-      this.props.addToBlacklist(owner);
-      this.setState({ owner: '' });
+      const { name } = this.state;
+      this.props.addToBlacklist(name);
+      this.setState({ name: '' });
     /****** Q4: Code Ends here. ******/
     }
 
@@ -250,8 +263,8 @@ class BlackList extends React.Component {
           <TextInput
             style={styles.input}
             placeholder="Name to Blacklist"
-            value={this.state.owner}
-            onChangeText={(text) => this.handleChange(text)}
+            value={this.state.name}
+            onChangeText={this.handleChange}
           />
           <Button title="Add to Blacklist" onPress={this.handleSubmit} />
         {/****** Q4: Code Ends here. ******/}
@@ -300,13 +313,13 @@ export default class IssueList extends React.Component {
     }
     }
     
-    async addToBlacklist(owner) {
-      const query = `mutation addBlacklist($owner: String!) {
-        addBlacklist(owner: $owner)
+    async addToBlacklist(name) {
+      const query = `mutation addToBlacklist($nameInput: String!) {
+        addToBlacklist(nameInput: $nameInput)
       }`;
-      const data = await graphQLFetch(query, { owner });
+      const data = await graphQLFetch(query, { nameInput: name });
       if (data) {
-        alert(`Owner "${owner}" added to blacklist.`);
+        alert(`"${name}" added to blacklist.`);
       }
     }
 
